@@ -14,7 +14,10 @@ const typeDefs = `
   # the schema allows the following query:
   type Query {
     posts: [Post]
-    author(id: Int!): Author
+    post(id: Int!): Post
+    author(id: Int!): Author,
+    postById(id: Int!): Post
+    postsByText(title: String!): [Post]
   }
   # this schema allows the following mutation:
   type Mutation {
@@ -42,9 +45,18 @@ const lodash = require('lodash');
 const resolvers = {
         Query: {
             posts: () => posts,
-            author: (abc, {id}) => {
-                console.log(abc);
+            author: (_, {id}) => {
                 return lodash.find(authors, {id: id});
+            },
+            postById: (_, {id}) => lodash.find(posts, {id: id}),
+            postsByText: (_, {title}) => {
+                let arr = [];
+                posts.map(item => {
+                    if(item.title.indexOf(title) >= 0) {
+                        arr.push(item)
+                    }
+                })
+                return arr;
             }
         },
 
