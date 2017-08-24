@@ -1,6 +1,6 @@
 'use strict';
 
-var typeDefs = '\n  type Author {\n    id: Int!\n    firstName: String\n    lastName: String\n    posts: [Post] # the list of Posts by this author\n  }\n  type Post {\n    id: Int!\n    title: String\n    author: Author\n    votes: Int\n  }\n  # the schema allows the following query:\n  type Query {\n    posts: [Post]\n    author(id: Int!): Author\n  }\n  # this schema allows the following mutation:\n  type Mutation {\n    upvotePost (\n      postId: Int!\n    ): Post\n  }\n';
+var typeDefs = '\n  type Author {\n    id: Int!\n    firstName: String\n    lastName: String\n    posts: [Post] # the list of Posts by this author\n  }\n  type Post {\n    id: Int!\n    title: String\n    author: Author\n    votes: Int\n  }\n  # the schema allows the following query:\n  type Query {\n    posts: [Post]\n    post(id: Int!): Post\n    author(id: Int!): Author,\n    postById(id: Int!): Post\n    postsByText(title: String!): [Post]\n  }\n  # this schema allows the following mutation:\n  type Mutation {\n    upvotePost (\n      postId: Int!\n    ): Post\n  }\n';
 
 // example data
 var authors = [{ id: 1, firstName: 'Tom', lastName: 'Coleman' }, { id: 2, firstName: 'Sashko', lastName: 'Stubailo' }, { id: 3, firstName: 'Mikhail', lastName: 'Novikov' }];
@@ -12,17 +12,31 @@ var resolvers = {
         posts: function posts() {
             return _posts;
         },
-        author: function author(abc, _ref) {
+        author: function author(_, _ref) {
             var id = _ref.id;
 
-            console.log(abc);
             return lodash.find(authors, { id: id });
+        },
+        postById: function postById(_, _ref2) {
+            var id = _ref2.id;
+            return lodash.find(_posts, { id: id });
+        },
+        postsByText: function postsByText(_, _ref3) {
+            var title = _ref3.title;
+
+            var arr = [];
+            _posts.map(function (item) {
+                if (item.title.indexOf(title) >= 0) {
+                    arr.push(item);
+                }
+            });
+            return arr;
         }
     },
 
     Mutation: {
-        upvotePost: function upvotePost(_, _ref2) {
-            var postId = _ref2.postId;
+        upvotePost: function upvotePost(_, _ref4) {
+            var postId = _ref4.postId;
 
             var post = lodash.find(_posts, { id: postId });
             if (!post) {

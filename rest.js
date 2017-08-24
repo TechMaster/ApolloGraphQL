@@ -34,4 +34,4 @@ app.get('/post/:id', function(req, res){
     res.json(result)
 });
 
-app.listen(3000);
+app.listen(4000);
