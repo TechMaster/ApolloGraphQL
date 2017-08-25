@@ -1,9 +1,12 @@
 const typeDefs = `
+  # Tác giả của post
   type Author {
     id: Int!
+    # User first name
     firstName: String
     lastName: String
-    posts: [Post] # the list of Posts by this author
+    # the list of Posts by this author
+    posts: [Post] 
   }
   type Post {
     id: Int!
@@ -11,11 +14,18 @@ const typeDefs = `
     author: Author
     votes: Int
   }
-  # the schema allows the following query:
+  # Các câu lệnh truy vấn, một số gọi vào REST ở cổng 4000
   type Query {
+    # Mockup posts
     posts: [Post]
+        
+    # Call rest API at port 4000 
+    getPosts: [Post]
     post(id: Int!): Post
-    author(id: Int!): Author,
+    author(id: Int!): Author
+    
+    # Tìm tác giả theo id
+    getAuthor(id: Int!): Author
     postById(id: Int!): Post
     postsByText(title: String!): [Post]
   }
@@ -41,18 +51,29 @@ const posts = [
     {id: 4, authorId: 3, title: 'Launchpad is Cool', votes: 7},
 ];
 const lodash = require('lodash');
-
+const fetch = require('node-fetch');
 const resolvers = {
         Query: {
             posts: () => posts,
+
+            getPosts: () => {
+                return fetch("http://localhost:4000/posts").then(
+                    res => res.json()
+                )
+            },
             author: (_, {id}) => {
-                return lodash.find(authors, {id: id});
+                return lodash.find(authors, {id: id})
+            },
+            getAuthor: (_, {id}) => {
+                return fetch(`http://localhost:4000/author/${id}`).then(
+                    res => res.json()
+                )
             },
             postById: (_, {id}) => lodash.find(posts, {id: id}),
             postsByText: (_, {title}) => {
                 let arr = [];
                 posts.map(item => {
-                    if(item.title.indexOf(title) >= 0) {
+                    if (item.title.indexOf(title) >= 0) {
                         arr.push(item)
                     }
                 })
